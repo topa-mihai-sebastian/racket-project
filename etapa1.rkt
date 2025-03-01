@@ -46,21 +46,26 @@
 ; in: pairing heap ph
 ; out: true, dacă ph este vid
 ;      false, altfel
-(define ph-empty? 'your-code-here)
+(define (ph-empty? ph)
+	(null? ph))
 
 ; ph-root : PH -> T | Bool
 ; in: pairing heap ph
 ; out: false, dacă ph e vid
 ;      root(ph), altfel
 (define (ph-root ph)
-  'your-code-here)
+  (cond
+  [(ph-empty? ph) false]
+  [else (first ph)]))
 
 ; ph-subtrees : PH -> [PH] | Bool
 ; in: pairing heap ph
 ; out: false, dacă ph e vid
 ;      copii(ph), altfel
 (define (ph-subtrees ph)
-  'your-code-here)
+  (cond
+  [(ph-empty? ph) false]
+  [else (rest ph)]))
 
 
 ; TODO 2 (15p)
