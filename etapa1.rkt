@@ -85,8 +85,19 @@
 ; argumentele lui merge în ordinea
 ; specificată în enunț!
 (define (merge ph1 ph2)
-  'your-code-here)
+  (cond
+    [(ph-empty? ph1) ph2]
+    [(ph-empty? ph2) ph1]
+    [else
+      (if (>= (ph-root ph1) (ph-root ph2))  
+          (cons (ph-root ph1) (cons ph2 (ph-subtrees ph1)))
+          (cons (ph-root ph2) (cons ph1 (ph-subtrees ph2))))
+    ]
+  )
+)
 
+;(merge '(7 (1) (3)) '(4))
+;(merge '(7 (1) (3)) '(4)) is '(7 (4) (1) (3))
 
 ; TODO 3 (10p)
 ; ph-insert : T x PH -> PH
