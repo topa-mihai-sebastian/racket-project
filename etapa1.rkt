@@ -107,7 +107,6 @@
 ;    PH-ul creat doar din valoarea val
 ;    (în această ordine)
 (define (ph-insert val ph)
-  'your-code-here
   (cond
   [(ph-empty? ph) (val->ph val)]
   [else
@@ -123,8 +122,15 @@
 ;  - se inserează primul element din lst în PH-ul de până acum
 ; RESTRICȚII (10p):
 ;  - Folosiți recursivitate pe stivă.
+;(define (list->ph lst)
+;  (cond
+;    [(empty? lst) (empty-ph)]
+;    [else (ph-insert (first lst) (list->ph (rest lst)))]))
 (define (list->ph lst)
-  'your-code-here)
+    (cond
+    [(empty? lst) empty-ph]
+    [else
+    (ph-insert (first lst) (list->ph (rest lst)))]))
 
 
 ; TODO 5 (20p)
