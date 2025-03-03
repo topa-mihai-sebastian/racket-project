@@ -107,7 +107,11 @@
 ;    PH-ul creat doar din valoarea val
 ;    (în această ordine)
 (define (ph-insert val ph)
-  'your-code-here)
+  'your-code-here
+  (cond
+  [(ph-empty? ph) (val->ph val)]
+  [else
+  (merge ph (val->ph val))]))
 
 
 ; TODO 4 (10p)
