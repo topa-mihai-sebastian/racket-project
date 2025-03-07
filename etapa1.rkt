@@ -210,7 +210,10 @@
 ;  ...
 ;  - până rămâne un singur PH
 (define (tournament-merge phs)
-  'your-code-here)
+  (cond
+  [(null? phs) '()]
+  [(null? (rest phs)) (list (first phs))]
+  [else (two-pass-merge-LR phs)]))
         
 
 ; TODO 8 (10p)
@@ -220,4 +223,7 @@
 ;      ph' rezultat în urma ștergerii root(ph), altfel
 ;      - fiii root(ph) sunt uniți prin two-pass-merge-LR
 (define (ph-del-root ph)
-  'your-code-here)
+  (cond
+  [(null? ph) false]
+  [(null? (rest ph)) empty-ph]
+  [else (two-pass-merge-LR (rest ph))]))
