@@ -145,12 +145,21 @@
 ;    - ultimul PH, dacă nr_impar(phs)
 ; RESTRICȚII (10p):
 ;  - Folosiți recursivitate pe coadă.
+;(define (pairwise-merge phs)
+;  (cond
+;    [(null? phs) '()]                         ; lista goală
+;    [(null? (rest phs)) (list (first phs))]     ; un singur element rămâne
+;    [else (cons (merge (first phs) (second phs))
+;                (pairwise-merge (cddr phs)))])) ;deja am lucrat pe 2 elemente, trecem la urm 2
+
+;pe coada
 (define (pairwise-merge phs)
-  (cond
-    [(null? phs) '()]                         ; lista goală
-    [(null? (rest phs)) (list (first phs))]     ; un singur element rămâne
-    [else (cons (merge (first phs) (second phs))
-                (pairwise-merge (cddr phs)))])) ;deja am lucrat pe 2 elemente, trecem la urm 2
+  (define (helper phs acc)
+    (cond
+      [(null? phs) (reverse acc)]
+      [(null? (rest phs)) (reverse (cons (first phs) acc))]  
+      [else (helper (cddr phs) (cons (merge (first phs) (second phs)) acc))])) 
+  (helper phs '()))
 
 (define (combine ph-list)
 	(if(null? (rest ph-list))
@@ -158,10 +167,11 @@
 		(combine (cons (merge (first ph-list) (second ph-list)) (cddr ph-list)))))
 
 (define (two-pass-merge-LR phs)
-	(cond 
+	(cond
 	[(null? phs) empty-ph]
 	[(null? (rest phs)) (first phs)]
 	[else (two-pass-merge-LR (pairwise-merge phs))]))
+
 ; TODO 6 (20p)
 ; two-pass-merge-RL : [PH] -> PH
 ; in: listă de PH-uri phs
