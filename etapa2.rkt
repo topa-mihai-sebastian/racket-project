@@ -219,7 +219,7 @@
   		(if (member (movie-name m) seen) 
 			(mark-as-seen m) 
 			m)) 
-		movies))
+		movies)) ;;aplica pe movies lambda
  
 ; TODO 6 (10p)
 ; extract-seen : [Movie] -> [Symbol]
@@ -231,7 +231,10 @@
 ;  - Nu folosiți funcționale de tip fold.
 ;  - Folosiți cel puțin o funcțională.
 (define (extract-seen movies)
-  'your-code-here)
+  (map movie-name
+       (filter (lambda (m)
+                 (member 'seen (movie-others m)))
+               movies))) ;;aplica pe movies movie-name si returneaza o liksta de nume
 
 
 ; TODO 7 (15p)
