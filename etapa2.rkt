@@ -67,167 +67,6 @@
   [(ph-empty? ph) false]
   [else (rest ph)]))
 
-
-; TODO 2 (15p)
-; merge: PH x PH -> PH
-; in: pairing heaps ph1, ph2
-; out: union(ph1, ph2) astfel:
-;  - union(vid, orice) = orice
-;  - altfel, PH-ul cu root mai mic devine
-;    primul fiu al celui cu root mai mare
-;    (prin convenție, dacă rădăcinile sunt
-;    egale, ph2 devine fiul lui ph1)
-; ATENȚIE!
-; Rezultă că, doar atunci când se aplică 
-; pe PH-uri cu rădăcini egale, operația
-; merge nu este comutativă.
-; Pentru a trece testele, dați mereu  
-; argumentele lui merge în ordinea
-; specificată în enunț!
-(define (merge ph1 ph2)
-  (cond
-    [(ph-empty? ph1) ph2]
-    [(ph-empty? ph2) ph1]
-    [else
-      (if (>= (ph-root ph1) (ph-root ph2))  
-          (cons (ph-root ph1) (cons ph2 (ph-subtrees ph1)))
-          (cons (ph-root ph2) (cons ph1 (ph-subtrees ph2))))
-    ]
-  )
-)
-
-;(merge '(7 (1) (3)) '(4))
-;(merge '(7 (1) (3)) '(4)) is '(7 (4) (1) (3))
-
-; TODO 3 (10p)
-; ph-insert : T x PH -> PH
-; in: valoare val, pairing heap ph
-; out: ph' rezultat după inserția lui val în ph
-;  - inserția este un merge între ph și 
-;    PH-ul creat doar din valoarea val
-;    (în această ordine)
-(define (ph-insert val ph)
-  (cond
-  [(ph-empty? ph) (val->ph val)]
-  [else
-  (merge ph (val->ph val))]))
-
-
-; TODO 4 (10p)
-; list->ph : [T] -> PH
-; in: listă de valori lst
-; out: ph' rezultat din inserții repetate
-;  - se inserează ultimul element din lst în PH-ul vid
-;  - ...
-;  - se inserează primul element din lst în PH-ul de până acum
-; RESTRICȚII (10p):
-;  - Folosiți recursivitate pe stivă.
-;(define (list->ph lst)
-;  (cond
-;    [(empty? lst) (empty-ph)]
-;    [else (ph-insert (first lst) (list->ph (rest lst)))]))
-(define (list->ph lst)
-    (cond
-    [(empty? lst) empty-ph]
-    [else
-    (ph-insert (first lst) (list->ph (rest lst)))]))
-
-
-; TODO 5 (20p)
-; two-pass-merge-LR : [PH] -> PH
-; in: listă de PH-uri phs
-; out: ph' rezultat din merge stânga-dreapta:
-;  - merge de primele două PH-uri
-;  - merge de rezultat cu merge de următoarele două
-;  ...
-;  - merge de rezultat cu:
-;    - merge de ultimele două PH-uri, dacă nr_par(phs)
-;    - ultimul PH, dacă nr_impar(phs)
-; RESTRICȚII (10p):
-;  - Folosiți recursivitate pe coadă.
-;(define (pairwise-merge phs)
-;  (cond
-;    [(null? phs) '()]                         ; lista goală
-;    [(null? (rest phs)) (list (first phs))]     ; un singur element rămâne
-;    [else (cons (merge (first phs) (second phs))
-;                (pairwise-merge (cddr phs)))])) ;deja am lucrat pe 2 elemente, trecem la urm 2
-
-;pe coada
-(define (pairwise-merge phs)
-  (define (helper phs acc)
-    (cond
-      [(null? phs) (reverse acc)]
-      [(null? (rest phs)) (reverse (cons (first phs) acc))]  
-      [else (helper (cddr phs) (cons (merge (first phs) (second phs)) acc))])) 
-  (helper phs '()))
-
-(define (combine ph-list)
-	(if(null? (rest ph-list))
-		(first ph-list)
-		(combine (cons (merge (first ph-list) (second ph-list)) (cddr ph-list)))))
-
-(define (two-pass-merge-LR phs)
-	(cond
-	[(null? phs) empty-ph]
-	[(null? (rest phs)) (first phs)]
-	[else (two-pass-merge-LR (pairwise-merge phs))]))
-
-; TODO 6 (20p)
-; two-pass-merge-RL : [PH] -> PH
-; in: listă de PH-uri phs
-; out: ph' rezultat din merge dreapta-stânga
-; (ca mai sus, dar se începe cu ultimele două PH-uri:
-;  - merge de penultimul cu ultimul
-;  - merge de rezultat cu merge de anterioarele două etc.)
-; RESTRICȚII (10p):
-;  - Folosiți recursivitate pe stivă.
-(define (pairwise-merge-inv phs)
-  (cond
-    [(null? phs) '()]                         ; lista goală
-    [(null? (rest phs)) (list (first phs))]     ; un singur element rămâne
-    [else (cons (merge  (second phs) (first phs))
-                (pairwise-merge-inv (cddr phs)))])) ;deja am lucrat pe 2 elemente, trecem la urm 2
-
-(define (combine-inv ph-list)
-	(if(null? (rest ph-list))
-		(first ph-list)
-		(combine-inv (cons (merge (second ph-list) (first ph-list)) (cddr ph-list)))))
-
-(define (two-pass-merge-RL phs)
-  (cond 
-	[(null? phs) empty-ph]
-	[(null? (rest phs)) (first phs)]
-	[else (two-pass-merge-RL (pairwise-merge-inv phs))]))
-
-
-; TODO 7 (20p)
-; tournament-merge : [PH] -> PH
-; in: listă de PH-uri phs
-; out: ph' rezultat din merge tip "knock-out"
-;  - listele de ph-uri sunt parcurse stânga-dreapta
-;  - merge două câte două (pentru număr impar, ultimul rămâne ca atare)
-;  - merge două câte două între PH-urile rezultate anterior
-;  ...
-;  - până rămâne un singur PH
-(define (tournament-merge phs)
-  (cond
-  [(null? phs) '()]
-  [(null? (rest phs)) (list (first phs))]
-  [else (two-pass-merge-LR phs)]))
-        
-
-; TODO 8 (10p)
-; ph-del-root : PH -> PH | Bool
-; in: pairing heap ph
-; out: false, dacă ph e vid
-;      ph' rezultat în urma ștergerii root(ph), altfel
-;      - fiii root(ph) sunt uniți prin two-pass-merge-LR
-(define (ph-del-root ph)
-  (cond
-  [(null? ph) false]
-  [(null? (rest ph)) empty-ph]
-  [else (two-pass-merge-LR (rest ph))]))
-
 ; TODO 1 (15p)
 ; Definiți funcția merge-f în formă curry, 
 ; astfel încât ulterior să definiți point-free
@@ -248,7 +87,6 @@
 ;   - altfel, PH-ul cu root "mai puțin comp" 
 ;     devine primul fiu al celuilalt
 ;     (la egalitate, ph2 devine fiul lui ph1)
-;; Define merge-f in curried form
 (define (merge-f comp)
   (lambda (ph1 ph2)
     (cond
@@ -305,8 +143,21 @@
 ;  - list->ph
 ;  - two-pass-merge-LR
 ;  - ph-del-root
+(define (ph-insert merge val ph)
+  (cond
+  [(ph-empty? ph) (val->ph val)]
+  [else
+  (merge ph (val->ph val))]))
 
-
+(define (list->ph merge lst)
+    (cond
+    [(empty? lst) empty-ph]
+    [else
+    (ph-insert merge (first lst) (list->ph merge (rest lst)))]))
+(define two-pass-merge-LR
+'res)
+(define ph-del-root
+'djksab)
 ;; PARTEA A DOUA (cea în care prelucrăm filme)
 
 ;; Definim un film (movie) ca pe o structură cu 5 câmpuri:   
