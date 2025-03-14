@@ -198,9 +198,13 @@
 ; in: film m
 ; out: m actualizat astfel încât symbolul 'seen este
 ;      adăugat la începutul câmpului (listei) others
-(define (mark-as-seen m)
-  'your-code-here)
 
+(define (mark-as-seen m)
+  (make-movie (movie-name m)
+  				(movie-rating m)
+				(movie-genre m)
+				(movie-duration m)
+				(cons 'seen (movie-others m))))
 
 ; TODO 5 (10p)
 ; mark-as-seen-from-list : [Movie] x [Symbol] -> [Movie]
@@ -211,8 +215,11 @@
 ;  - Nu folosiți recursivitate explicită.
 ;  - Folosiți cel puțin o funcțională.
 (define (mark-as-seen-from-list movies seen)
-  'your-code-here)
-
+  (map (lambda (m)
+  		(if (member (movie-name m) seen) 
+			(mark-as-seen m) 
+			m)) 
+		movies))
  
 ; TODO 6 (10p)
 ; extract-seen : [Movie] -> [Symbol]
