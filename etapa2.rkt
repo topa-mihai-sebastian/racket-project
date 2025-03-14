@@ -154,10 +154,31 @@
     [(empty? lst) empty-ph]
     [else
     (ph-insert merge (first lst) (list->ph merge (rest lst)))]))
-(define two-pass-merge-LR
-'res)
-(define ph-del-root
-'djksab)
+
+(define (pairwise-merge merge phs)
+  (define (helper phs acc)
+    (cond
+      [(null? phs) (reverse acc)]
+      [(null? (rest phs)) (reverse (cons (first phs) acc))]  
+      [else (helper (cddr phs) (cons (merge (first phs) (second phs)) acc))])) 
+  (helper phs '()))
+
+(define (combine merge ph-list)
+	(if(null? (rest ph-list))
+		(first ph-list)
+		(combine (cons (merge (first ph-list) (second ph-list)) (cddr ph-list)))))
+
+(define (two-pass-merge-LR merge phs)
+	(cond
+	[(null? phs) empty-ph]
+	[(null? (rest phs)) (first phs)]
+	[else (two-pass-merge-LR merge (pairwise-merge merge phs))]))
+
+(define (ph-del-root merge ph)
+  (cond
+  [(null? ph) false]
+  [(null? (rest ph)) empty-ph]
+  [else (two-pass-merge-LR merge (rest ph))]))
 ;; PARTEA A DOUA (cea în care prelucrăm filme)
 
 ;; Definim un film (movie) ca pe o structură cu 5 câmpuri:   
