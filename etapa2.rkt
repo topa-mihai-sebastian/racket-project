@@ -273,7 +273,9 @@
 ;  - Nu folosiți recursivitate explicită.
 ;  - Folosiți cel puțin o funcțională.
 (define (extract-name-rating movies)
-  'your-code-here)
+  (map (lambda (m) ;;pentru fiecare element din movies
+  		(cons (movie-name m) (movie-rating m))) ;;fac asta
+		movies))
 
 
 ; TODO 9 (10p)
