@@ -256,7 +256,7 @@
 	[else (/ (apply + lst) (length lst))]))
 
 
-(define (rating-stats movies) ;;2 variabile care au listele cu filme seen un
+(define (rating-stats movies) ;;2 variabile care au listele cu filme seen unseen
   (let* ((seen-movies (filter (lambda (m) (member 'seen (movie-others m))) movies))
          (unseen-movies (filter (lambda (m) (not (member 'seen (movie-others m)))) movies))
          (seen-ratings (map movie-rating seen-movies))
@@ -288,8 +288,15 @@
 ;  - ...
 ;  - se inserează prima pereche în PH-ul de până acum
 (define (make-rating-ph movies)
-  'your-code-here)
+	;;pun in pairs perechile cu toate filmele
+  (let ((pairs (extract-name-rating movies)))
+	;;pentru fiecare pereche se aplica functia lambda
 
+	;;functia ia un ph si o pereche si face megre folosind
+	;;merge-max-rating
+    (foldr (lambda (pair ph) (ph-insert merge-max-rating pair ph))
+           empty-ph
+           pairs)))
 
 ; TODO 10 (10p)
 ; before? : T1 x T2 x List
@@ -302,8 +309,9 @@
 ;  - Identificați în Help Desk funcționala findf
 ;    și folosiți-o.
 (define (before? a b L)
-  'your-code-here)
-
+	;;pun in found primul element din L care este fie egal cu b fie cu a
+  (define found (findf (lambda (x) (or (equal? x a) (equal? x b))) L))
+  (or (equal? found a) (equal? a b)))
 
 ; TODO 11 (10p)
 ; make-genre-ph : [Movie] x [Symbol] -> PH
