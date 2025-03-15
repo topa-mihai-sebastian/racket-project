@@ -234,7 +234,7 @@
   (map movie-name
        (filter (lambda (m)
                  (member 'seen (movie-others m)))
-               movies))) ;;aplica pe movies movie-name si returneaza o liksta de nume
+               movies))) ;;aplica pe movies movie-name si returneaza o lista de nume
 
 
 ; TODO 7 (15p)
@@ -249,8 +249,19 @@
 ;  - Folosiți cel puțin o funcțională.
 ;  - Nu parcurgeți filmele din listă (sau părți ale listei)
 ;    mai mult decât o dată.
-(define (rating-stats movies)
-  'your-code-here)
+
+(define (avg lst)
+	(cond
+	[(null? lst) 0]
+	[else (/ (apply + lst) (length lst))]))
+
+
+(define (rating-stats movies) ;;2 variabile care au listele cu filme seen un
+  (let* ((seen-movies (filter (lambda (m) (member 'seen (movie-others m))) movies))
+         (unseen-movies (filter (lambda (m) (not (member 'seen (movie-others m)))) movies))
+         (seen-ratings (map movie-rating seen-movies))
+         (unseen-ratings (map movie-rating unseen-movies)))
+    (cons (avg seen-ratings) (avg unseen-ratings))))
 
 
 ; TODO 8 (10p)
