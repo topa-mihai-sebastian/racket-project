@@ -326,6 +326,13 @@
 ; observație: când se inserează un film de același
 ; gen cu root-ul curent, noul film devine fiul
 ; root-ului 
-(define (make-genre-ph movies genres)
+(define (make-genre-ph1 movies genres)
   'your-code-here)
-
+(define (make-genre-ph movies genres)
+  (foldr (lambda (movie ph)
+           (ph-insert (merge-f (lambda (a b)
+                                 (before? (movie-genre a) (movie-genre b) genres)))
+                      movie
+                      ph))
+         empty-ph
+         movies))
