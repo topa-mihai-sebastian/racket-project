@@ -87,14 +87,19 @@
 ;   - altfel, PH-ul cu root "mai puțin comp" 
 ;     devine primul fiu al celuilalt
 ;     (la egalitate, ph2 devine fiul lui ph1)
+
 (define (merge-f comp)
+;; e curry pt ca la inceput ia doar comparatorul comp
   (lambda (ph1 ph2)
     (cond
       [(null? ph1) ph2]
       [(null? ph2) ph1]
+	  ;;comparam radacinile cu comparatorul dat
       [(comp (car ph1) (car ph2))
+	  	;;root(ph2) devine subarbore pt ph1
        (cons (car ph1) (cons ph2 (cdr ph1)))]
       [(comp (car ph2) (car ph1))
+	  ;;root(ph1) devine subarbore pt ph2
        (cons (car ph2) (cons ph1 (cdr ph2)))]
       [else
        (cons (car ph1) (cons ph2 (cdr ph1)))])))
@@ -155,7 +160,11 @@
 (define (helper merge phs acc)
     (cond
       [(null? phs) (reverse acc)]
-      [(null? (rest phs)) (reverse (cons (first phs) acc))]  
+      [(null? (rest phs)) (reverse (cons (first phs) acc))]
+	  ;;luam primele 2 el
+	  ;;le combinam folosind merge
+	  ;;adaugam rez in acc
+	  ;;continuam recursiv pt restul listei (cddr)
       [else (helper merge (cddr phs) (cons (merge (first phs) (second phs)) acc))])) 
 (define (pairwise-merge merge phs)
   (helper merge phs '()))
@@ -190,6 +199,7 @@
 ; RESTRICȚII (10p):
 ;  - Nu identificați elementele listei, ci folosiți o funcțională.
 (define (lst->movie lst)
+  ;;apeleaza make-movie pt fiecare element din lst
   (apply make-movie lst))
 
 
@@ -200,7 +210,9 @@
 ;      adăugat la începutul câmpului (listei) others
 
 (define (mark-as-seen m)
-  (make-movie (movie-name m)
+	;;fac un film nou cu aceleasi detalii doar ca
+	;;pun 'seen la movie-others
+  (make-movie   (movie-name m)
   				(movie-rating m)
 				(movie-genre m)
 				(movie-duration m)
@@ -257,8 +269,10 @@
 
 
 (define (rating-stats movies) ;;2 variabile care au listele cu filme seen unseen
+	;;filter selecteaza filmele care au 'seen 
   (let* ((seen-movies (filter (lambda (m) (member 'seen (movie-others m))) movies))
          (unseen-movies (filter (lambda (m) (not (member 'seen (movie-others m)))) movies))
+		 ;;map aplica functia movie-rating pe fiecare el. din seen-movies
          (seen-ratings (map movie-rating seen-movies))
          (unseen-ratings (map movie-rating unseen-movies)))
     (cons (avg seen-ratings) (avg unseen-ratings))))
@@ -293,7 +307,7 @@
 	;;pentru fiecare pereche se aplica functia lambda
 
 	;;functia ia un ph si o pereche si face megre folosind
-	;;merge-max-rating
+	;;merge-max-rating de mai sus
     (foldr (lambda (pair ph) (ph-insert merge-max-rating pair ph))
            empty-ph
            pairs)))
@@ -325,14 +339,19 @@
 ;  - se inserează primul film în PH-ul de până acum
 ; observație: când se inserează un film de același
 ; gen cu root-ul curent, noul film devine fiul
-; root-ului 
-(define (make-genre-ph1 movies genres)
-  'your-code-here)
+; root-ului
+
 (define (make-genre-ph movies genres)
   (foldr (lambda (movie ph)
+			;;inseram filmul in ph
+			;;merge-f foloseste before? pt comparator
            (ph-insert (merge-f (lambda (a b)
+		   						;;daca genul lui a apare inaintea genului lui b in genres
                                  (before? (movie-genre a) (movie-genre b) genres)))
-                      movie
+                      ;;filmul curent
+					  movie
+					  ;;ph-ul curent
                       ph))
-         empty-ph
+         ;;se incepe cu ph gol
+		 empty-ph
          movies))
