@@ -41,19 +41,21 @@
          movies))
 
 (define (best-k op movies k)
-  ;; Construim pairing heap-ul folosind movies->ph
+  ;; ph contine toate filmele in functie de criteriul de comparatie op
   (let ((ph (movies->ph op movies))
-        (merge (merge-f op))) ;; Generăm funcția de merge pe baza comparatorului op
-    ;; Folosim named let pentru a extrage rădăcinile
+        (merge (merge-f op))) ;; aici fac o functie "merge" care este facuta cu merge-f
+    ;; recursivitate
+	;; "loop" e o functie pe care o voi apela
     (let loop ((ph ph) (result '()) (count 0))
       (cond
-        ;; Dacă am extras deja k filme sau PH-ul este vid, returnăm rezultatul
+        ;; daca am trecut prin toate filmele, sau nu a mai ramas nimic in ph
+		;; se returneaza rezultatul
         [(or (>= count k) (null? ph)) (reverse result)]
-        ;; Altfel, extragem rădăcina și continuăm
+        
         [else
-         (let ((root (ph-root ph))       ;; Extragem rădăcina
-               (new-ph (ph-del-root merge ph))) ;; Ștergem rădăcina din PH folosind merge
-           (loop new-ph (cons root result) (add1 count)))]))))
+         (let ((root (ph-root ph))
+               (new-ph (ph-del-root merge ph)));;stergem root si facem merge folosind functia declarata
+           (loop new-ph (cons root result) (+ 1 count)))])))) ;;add1
 
 
 ; best-k-rating : [Movie] x Int -> [Movie]
@@ -71,18 +73,6 @@
 ; out: cele mai scurte k filme din movies 
 ; RESTRICȚII (5p):
 ;  - Obțineți best-k-duration ca aplicație a lui best-k.
-(define m10  (make-movie 'hundreds-of-beavers  10 'comedy    '(1 48) '(slapstick action)))
-(define m9   (make-movie '12-angry-men         9  'drama     '(1 36) '(legal)))
-(define m8   (make-movie 'manchurian-candidate 8  'thriller  '(2 06) '(spy tragedy)))
-(define m7   (make-movie 'm*a*s*h              7  'comedy    '(1 56) '(satire drama)))
-(define m6   (make-movie 'pulse-kairo          6  'horror    '(1 59) '(supernatural mystery)))
-(define m5   (make-movie 'trap                 5  'horror    '(1 45) '(crime thriller)))
-(define ms10 (make-movie 'rear-window          10 'thriller  '(1 52) '(seen drama suspense)))
-(define ms9  (make-movie 'm                    9  'thriller  '(1 39) '(seen crime mystery)))
-(define ms8  (make-movie 'menilmontant         8  'drama     '(0 38) '(seen tragedy short)))
-(define ms7  (make-movie 'neo-tokyo            7  'animation '(0 50) '(seen scifi fantasy)))
-(define ms3  (make-movie 'maniac               3  'horror    '(0 51) '(seen b-horror)))
-
 
 (define best-k-duration
   (lambda (movies k)
@@ -106,9 +96,25 @@
 ;        nu satisface p, se întoarce lista pairs nemodificată
 ; RESTRICȚII (20p):
 ;  - Folosiți named let pentru a itera prin perechi.
+
 (define (update-pairs p pairs)
-  'your-code-here)
-                  
+  (let loop ((remaining pairs) (result '()))
+    (cond
+      ;; Dacă lista de perechi este goală, returnăm rezultatul inversat
+      [(null? remaining) (reverse result)]
+      ;; Dacă predicatul este adevărat pentru prima pereche
+      [(p (first remaining))
+       (let* ((pair (first remaining))
+              (name (car pair))
+              (ph (cdr pair))
+              (new-ph (ph-del-root (merge-f >) ph))) ;; Ștergem rădăcina din PH
+         ;; Dacă PH-ul rezultat este vid, eliminăm perechea
+         ;; Altfel, actualizăm perechea cu PH-ul nou
+         (if (null? new-ph)
+             (reverse (append result (rest remaining))) ;; Eliminăm perechea
+             (reverse (append result (cons (cons name new-ph) (rest remaining))))))]
+      ;; Dacă predicatul nu este adevărat, continuăm cu restul perechilor
+      [else (loop (rest remaining) (cons (first remaining) result))])))               
 
 ; TODO 3 (50p)
 ; best-k-ratings-overall : [(Symbol, PH)] x Int
