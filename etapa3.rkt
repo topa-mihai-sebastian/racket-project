@@ -100,21 +100,24 @@
 (define (update-pairs p pairs)
   (let loop ((remaining pairs) (result '()))
     (cond
-      ;; Dacă lista de perechi este goală, returnăm rezultatul inversat
-      [(null? remaining) (reverse result)]
-      ;; Dacă predicatul este adevărat pentru prima pereche
+      ;; daca lista ramasa este goala returnam rezultatul
+      [(null? remaining) result]
+	  ;;2e verific daca cdr din primul element este #f
+	  [(or (null? (cdr (first remaining))) (eq? (cdr (first remaining)) #f))
+	  (loop (rest remaining) (append result (list (first remaining))))]
+      ;; daca predicatul(conditia) este adevarata pentru primul el
       [(p (first remaining))
        (let* ((pair (first remaining))
               (name (car pair))
               (ph (cdr pair))
-              (new-ph (ph-del-root (merge-f >) ph))) ;; Ștergem rădăcina din PH
+              (new-ph (ph-del-root merge-max ph))) ;; Ștergem rădăcina din PH
          ;; Dacă PH-ul rezultat este vid, eliminăm perechea
          ;; Altfel, actualizăm perechea cu PH-ul nou
          (if (null? new-ph)
-             (reverse (append result (rest remaining))) ;; Eliminăm perechea
-             (reverse (append result (cons (cons name new-ph) (rest remaining))))))]
+             (append result (rest remaining)) ;; Eliminăm perechea
+             (append result (cons (cons name new-ph) (rest remaining)))))]
       ;; Dacă predicatul nu este adevărat, continuăm cu restul perechilor
-      [else (loop (rest remaining) (cons (first remaining) result))])))               
+      [else (loop (rest remaining) (append result (list (first remaining))))])))               
 
 ; TODO 3 (50p)
 ; best-k-ratings-overall : [(Symbol, PH)] x Int
