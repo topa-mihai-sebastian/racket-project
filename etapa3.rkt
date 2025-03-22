@@ -33,8 +33,28 @@
 ; RESTRICȚII (20p):
 ;  - Folosiți named let pentru a efectua pasul 2 al
 ;    algoritmului.
-(define best-k
-  'your-code-here)
+
+(define (movies->ph op movies)
+  (foldl (lambda (movie ph)
+           (ph-insert (merge-f op) movie ph))
+         empty-ph
+         movies))
+
+(define (best-k op movies k)
+  ;; Construim pairing heap-ul folosind movies->ph
+  (let ((ph (movies->ph op movies))
+        (merge (merge-f op))) ;; Generăm funcția de merge pe baza comparatorului op
+    ;; Folosim named let pentru a extrage rădăcinile
+    (let loop ((ph ph) (result '()) (count 0))
+      (cond
+        ;; Dacă am extras deja k filme sau PH-ul este vid, returnăm rezultatul
+        [(or (>= count k) (null? ph)) (reverse result)]
+        ;; Altfel, extragem rădăcina și continuăm
+        [else
+         (let ((root (ph-root ph))       ;; Extragem rădăcina
+               (new-ph (ph-del-root merge ph))) ;; Ștergem rădăcina din PH folosind merge
+           (loop new-ph (cons root result) (add1 count)))]))))
+
 
 ; best-k-rating : [Movie] x Int -> [Movie]
 ; in: listă de filme movies, număr k
@@ -42,16 +62,35 @@
 ; RESTRICȚII (5p):
 ;  - Obțineți best-k-rating ca aplicație a lui best-k.
 (define best-k-rating
-  'your-code-here)
+  (lambda (movies k)
+  	(best-k (lambda (a b) (> (movie-rating a) (movie-rating b)))
+		movies k)))
 
 ; best-k-duration : [Movie] x Int -> [Movie]
 ; in: listă de filme movies, număr k
 ; out: cele mai scurte k filme din movies 
 ; RESTRICȚII (5p):
 ;  - Obțineți best-k-duration ca aplicație a lui best-k.
-(define best-k-duration
-  'your-code-here)
+(define m10  (make-movie 'hundreds-of-beavers  10 'comedy    '(1 48) '(slapstick action)))
+(define m9   (make-movie '12-angry-men         9  'drama     '(1 36) '(legal)))
+(define m8   (make-movie 'manchurian-candidate 8  'thriller  '(2 06) '(spy tragedy)))
+(define m7   (make-movie 'm*a*s*h              7  'comedy    '(1 56) '(satire drama)))
+(define m6   (make-movie 'pulse-kairo          6  'horror    '(1 59) '(supernatural mystery)))
+(define m5   (make-movie 'trap                 5  'horror    '(1 45) '(crime thriller)))
+(define ms10 (make-movie 'rear-window          10 'thriller  '(1 52) '(seen drama suspense)))
+(define ms9  (make-movie 'm                    9  'thriller  '(1 39) '(seen crime mystery)))
+(define ms8  (make-movie 'menilmontant         8  'drama     '(0 38) '(seen tragedy short)))
+(define ms7  (make-movie 'neo-tokyo            7  'animation '(0 50) '(seen scifi fantasy)))
+(define ms3  (make-movie 'maniac               3  'horror    '(0 51) '(seen b-horror)))
 
+
+(define best-k-duration
+  (lambda (movies k)
+    (best-k (lambda (a b);; apare ora+minute deci trb sa fac conversie
+              (< (+ (* 60 (first (movie-duration a))) (second (movie-duration a)))
+                 (+ (* 60 (first (movie-duration b))) (second (movie-duration b)))))
+            movies k)))
+;(best-k-duration (list m8 ms9 ms3 m7) 4)
 
 ; TODO 2 (30p)
 ; update-pairs : ((Symbol, PH) -> Bool) x [(Symbol, PH)]
