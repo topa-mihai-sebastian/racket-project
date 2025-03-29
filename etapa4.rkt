@@ -59,8 +59,26 @@
 ;  - dacă delta < 0
 ;    mută root(min-ph) în max-ph
 (define (add-rating quad rating)
-  'your-code-here)
-
+  (let* ((nume (first quad))
+         (delta (second quad))
+         (max-ph (third quad))
+         (min-ph (fourth quad)))
+    ;; Se adaugă în max-ph
+    (if (<= rating (ph-root max-ph))
+        (let* ((new-max-ph (ph-insert (merge-f >) rating max-ph)))
+          ;; Dacă delta devine > 1, mutăm rădăcina din max-ph în min-ph
+          (if (> (+ delta 1) 1)
+              (let* ((new-min-ph (ph-insert (merge-f <) (ph-root new-max-ph) min-ph))
+                     (updated-max-ph (ph-del-root (merge-f >) new-max-ph)))
+                (list nume 0 updated-max-ph new-min-ph)) ;; Delta devine 0
+              (list nume (+ delta 1) new-max-ph min-ph))) ;; Delta crește cu 1
+        ;; Ramura else (pentru cazul în care rating > ph-root(max-ph)) va fi adăugată ulterior
+        (let* ((new-min-ph (ph-insert (merge-f <) rating min-ph)))
+			(if (< (+ delta 1) 1)
+				(let* ((new-max-ph (ph-insert (merge-f >) (ph-root new-min-ph) max-ph))
+						(updated-min-ph (ph-del-root (merge-f <) new-min-ph)))
+						(list nume 0 new-max-ph updated-min-ph))
+			(list nume (- delta 1) max-ph new-min-ph))))))
 
 ; TODO 2 (45p)
 ; reviews->quads : Stream<(Symbol, Number)> ->
