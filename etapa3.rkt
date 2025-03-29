@@ -144,4 +144,3 @@
 ;    algoritmului.
 (define (best-k-ratings-overall pairs k)
   'your-code-here)
-
