@@ -58,26 +58,30 @@
 ;    mută root(max-ph) în min-ph
 ;  - dacă delta < 0
 ;    mută root(min-ph) în max-ph
+
 (define (add-rating quad rating)
   (let* ((nume (first quad))
          (delta (second quad))
          (max-ph (third quad))
          (min-ph (fourth quad)))
-    ;; Se adaugă în max-ph
+    ;; daca rating <= se baga in max-ph
     (if (<= rating (ph-root max-ph))
         (let* ((new-max-ph (ph-insert (merge-f >) rating max-ph)))
-          ;; Dacă delta devine > 1, mutăm rădăcina din max-ph în min-ph
+          ;; daca max-ph devine prea mare mut radacina max-ph in min-ph
           (if (> (+ delta 1) 1)
               (let* ((new-min-ph (ph-insert (merge-f <) (ph-root new-max-ph) min-ph))
                      (updated-max-ph (ph-del-root (merge-f >) new-max-ph)))
-                (list nume 0 updated-max-ph new-min-ph)) ;; Delta devine 0
-              (list nume (+ delta 1) new-max-ph min-ph))) ;; Delta crește cu 1
-        ;; Ramura else (pentru cazul în care rating > ph-root(max-ph)) va fi adăugată ulterior
+                (list nume 0 updated-max-ph new-min-ph)) ;; reset : delta=0
+              (list nume (+ delta 1) new-max-ph min-ph))) ;; else delta++
+        ;; else adaug in min-ph
         (let* ((new-min-ph (ph-insert (merge-f <) rating min-ph)))
-			(if (< (+ delta 1) 1)
+			(if (< (+ delta 1) 1);;daca min-ph devine prea mare
+				;;mut radacina din min-ph in max-ph
 				(let* ((new-max-ph (ph-insert (merge-f >) (ph-root new-min-ph) max-ph))
 						(updated-min-ph (ph-del-root (merge-f <) new-min-ph)))
+						;;reset delta =0
 						(list nume 0 new-max-ph updated-min-ph))
+			;;else delta --
 			(list nume (- delta 1) max-ph new-min-ph))))))
 
 ; TODO 2 (45p)
@@ -94,9 +98,40 @@
 ; RESTRICȚII (20p):
 ;  - Lucrați cu operatorii pe fluxuri, fără a
 ;    converti liste în fluxuri sau fluxuri în liste.
-(define (reviews->quads reviews)
-  'your-code-here)
 
+(define (reviews->quads reviews)
+  ;;reviews flux de intrare, se consuma
+  ;; quads lista curenta
+  (let loop ([reviews reviews] [quads '()])
+    (if (stream-empty? reviews)
+        empty-stream
+		;;else
+        (let* (;; iau primul el din flux
+               [review (stream-first reviews)]
+               [name (car review)]
+               [rating (cdr review)]
+               
+               ;;daca filmul exista deja in quads
+               [existing (assoc name quads)]
+               
+			   ;;daca filmul exista, acutalizam cvartetul cu noul rating
+				;;else creez 
+               [new-quad (if existing
+                           (add-rating existing rating)
+						   ;; delta=1(primul element)
+                           (list name 1 (ph-insert (merge-f >) rating empty-ph) ;;max-ph
+						    empty-ph))]  ; min-ph(initial gol)
+               
+			   ;;daca filmul exista inlocuim vechiul cvartet
+			   ;;daca nu inlocuim noul cvartet
+               [new-quads (cons new-quad 
+                              (if existing (remove existing quads) 
+                                  quads))])
+          
+		  ;;adaug noul set de cvartete la stream
+		  ;; loop recursiv
+          (stream-cons new-quads 
+                      (loop (stream-rest reviews) new-quads))))))
 
 ; TODO 3 (30p)
 ; quads->medians : Stream<[(Symbol, Int, PH, PH)]> ->
@@ -108,5 +143,25 @@
 ; RESTRICȚII (20p):
 ;  - Nu folosiți recursivitate explicită. Folosiți cel
 ;    puțin o funcțională pe fluxuri.
+
 (define (quads->medians quads)
-  'your-code-here)
+  ;; verific daca streamul de input e gol
+  (if (stream-empty? quads)
+      quads
+      ;; else procesam fiecare el
+      (stream-map
+       (lambda (quads)
+         ;; trans cvartetele separate in perechi (nume . mediană)
+         (map (lambda (quad)
+                (let* ([name (first quad)]
+                       [delta (second quad)]    ; dif de dimens
+                       [max-ph (third quad)]    ; elemente mai mici
+                       [min-ph (fourth quad)])  ; elemente mari
+                  (cons name
+                        (if (zero? delta)
+                            ;; caz par
+                            (/ (+ (ph-root max-ph) (ph-root min-ph)) 2)
+                            ;; caz impar
+                            (ph-root max-ph)))))
+              quads))  ;; pentru fiecare quad
+       quads)))  ;; tot fluxul
